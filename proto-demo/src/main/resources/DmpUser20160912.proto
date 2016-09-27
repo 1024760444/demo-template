@@ -1,0 +1,75 @@
+package com.yhaitao.proto;
+
+// 统一用户信息
+message DmpUnifiedUser {
+	required string userId = 1; // 用户标识
+	repeated AdxMessage adxMessage = 2; // 用户匹配的ADX信息
+	optional UserRelation userRelate = 3; // 用户关联信息
+	repeated WeightObject userAges = 4; // 用户年龄信息
+	repeated Education educations = 5; // 学历信息
+	repeated Region regions = 6; // 用户的地理位置信息
+	repeated Interests interestses = 7; // 用户兴趣列表
+}
+// 用户对于的ADX匹配信息
+message AdxMessage {
+	required int32 id = 1; // ADX标识（由DSP自定义）
+	required string adxName = 2; // ADX名字字符串
+	required string userId = 3; // 匹配的用户标识
+	optional int64 updateTimeMillis = 4; // CM匹配时间
+	optional string version = 5; // 有点ADX版本信息
+}
+// 基本权限对象
+message WeightObject {
+	optional int32 id = 1; // 标识
+	optional string name = 2; // 描述
+	optional double weight = 3 [default = 0]; // 权值
+	optional int64 updateTimeMillis = 4; // 上次更新时间 
+}
+// 可用于用户关联的信息
+message UserRelation {
+	repeated WeightObject userNames = 1; // 用户名字信息
+	repeated WeightObject telephones = 2; // 电话号码
+	repeated WeightObject weChats = 3; // 微信信息
+	repeated WeightObject qqNumbers = 4; // QQ号码
+	repeated WeightObject mailbox = 5; // 邮箱信息
+}
+// 教育信息
+message Education {
+	optional int32 id = 1; // 用户学历标识
+	optional string profession = 2; // 专业
+	enum DEGREE {
+		BACHELOR = 0; 
+		MASTER = 1; 
+		DOCTOR = 2; 
+		OTHERS = 3;
+	}
+	optional DEGREE degree = 3 [default = OTHERS]; // 学位
+	optional string colleges = 4; // 学校名称
+	optional double weight = 5 [default = 0]; // 权值
+	optional int64 updateTimeMillis = 6; // 上次更新时间 
+}
+// 用户地理位置信息
+message Region {
+	optional int32 id = 1; // 地理位置标识
+	optional string province = 2; // 省、省级市
+	optional string city = 3; // 市、市级区县
+	optional string county = 4; // 区县
+	optional string street = 5; // 其他，乡，村街道等
+	optional string tradingArea = 6; // 商圈
+	optional double weight = 7 [default = 0]; // 权值
+	optional int64 updateTimeMillis = 8; // 上次更新时间 
+	optional Geography geography = 9; // GPS定位经纬度信息
+}
+// GPS定位经纬度信息
+message Geography {
+	optional double longitude = 1; // 经度
+	optional double latitude = 2; // 纬度
+	optional double altitude = 3; // 海拔
+}
+// 用户兴趣信息
+message Interests {
+	required int32 id = 1; // 关键字标识，用户兴趣矢量中的位置
+	optional double weight = 2 [default = 0]; // 权值
+	optional int64 updateTimeMillis = 3; // 上次更新时间 
+	repeated double historyWeight = 4 [packed=true]; // 历史权值
+}

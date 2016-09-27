@@ -1,0 +1,1 @@
+protoc --java_out=E:/workspace/proto-yhaitao/src/main/java/ DmpUser20160912.proto 

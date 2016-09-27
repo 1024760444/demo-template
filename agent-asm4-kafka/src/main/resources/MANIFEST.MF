@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Implementation-Title: agent
+Implementation-Version: 1.0
+Premain-Class: com.apm.asm.Agent

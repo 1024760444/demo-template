@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Built-By: yanghaitao
+Build-Jdk: 1.7.0_80
+Class-Path: lib/asm-4.0.jar
+Main-Class: com.apm.asm.Main
+Created-By: Maven Integration for Eclipse
+Implementation-Title: agent
+Implementation-Version: 1.0
+Premain-Class: com.apm.asm.ApmAgent
+

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yhaitao.manager.dao.mapper.FileMapper">
+	<!-- Map结构定义 -->
+	<resultMap id="FileMap" type="com.yhaitao.manager.dao.pojo.FilePojo">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="fileName" jdbcType="VARCHAR" property="fileName" />
+		<result column="fileDesc" jdbcType="VARCHAR" property="fileDesc" />
+		<result column="teamId" jdbcType="INTEGER" property="teamId" />
+		<result column="teamByname" jdbcType="VARCHAR" property="teamByname" />
+		<result column="userId" jdbcType="INTEGER" property="userId" />
+		<result column="userName" jdbcType="VARCHAR" property="userName" />
+		<result column="showId" jdbcType="INTEGER" property="showId" />
+		<result column="downId" jdbcType="INTEGER" property="downId" />
+		<result column="downCode" jdbcType="VARCHAR" property="downCode" />
+		<result column="createDate" jdbcType="VARCHAR" property="createDate" />
+	</resultMap>
+	
+	<!-- 角色信息列表  -->
+	<insert id="insert" parameterType="com.yhaitao.manager.dao.pojo.FilePojo" >
+		insert into t_docs_filelist(fileName, fileDesc, teamId, userId, showId, downId, downCode, createDate) 
+			values (#{fileName}, #{fileDesc}, #{teamId}, #{userId}, #{showId},#{downId}, #{downCode}, #{createDate}) 
+	</insert>
+	
+	<!-- 根据用户标识，更新用户信息 -->
+	<update id="update" parameterType="com.yhaitao.manager.dao.pojo.FilePojo" >
+		update t_docs_filelist set fileName=#{fileName}, fileDesc=#{fileDesc}, teamId=#{teamId}, userId=#{userId}, 
+			showId=#{showId}, downId=#{downId}, downCode=#{downCode}, createDate=#{createDate} where id=#{id}
+	</update>
+	
+	<!-- 删除一个用户 -->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from t_docs_filelist where id=#{id}
+	</delete>
+	
+	<!-- 分页查询 -->
+	<select id="selectOnPage" resultMap="FileMap" parameterType="java.util.Map">
+		select filelist.id, filelist.fileName, filelist.fileDesc, filelist.teamId, team.teamByname, 
+		filelist.userId, user.userName, filelist.showId, filelist.downId, filelist.downCode, filelist.createDate 
+		from t_docs_filelist filelist, t_docs_user user, t_docs_team team 
+			where 1=1 and filelist.teamId=team.id and filelist.userId=user.id 
+			<if  test="fileName != null"> 
+		 		 and filelist.fileName like '%${fileName}%' 
+			</if>
+			<if  test="teamId != null"> 
+		 		 and filelist.teamId='${teamId}' 
+			</if>
+			<if  test="userId != null"> 
+		 		 and (fileList.showId=2 or fileList.teamId in (select teamId from t_docs_user where id=${userId})) 
+			</if>
+			<if  test="showId != null">
+		 		 and filelist.showId='${showId}' 
+			</if>
+			<if  test="id != null">
+		 		 and filelist.id='${id}' 
+			</if>
+			<if  test="orderby != null">
+		 		 order by ${orderby} desc 
+			</if>
+			<if  test="start != null and perpage != null">
+		 		 limit ${start}, ${perpage} 
+			</if>
+	</select>
+	
+	<!-- 查询总量 -->
+	<select id="count" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(*) as count from t_docs_filelist filelist, t_docs_user user, t_docs_team team 
+			where 1=1 and filelist.teamId=team.id and filelist.userId=user.id 
+			<if  test="fileName != null"> 
+		 		 and filelist.fileName like '%${fileName}%' 
+			</if>
+			<if  test="teamId != null"> 
+		 		 and filelist.teamId='${teamId}' 
+			</if>
+			<if  test="userId != null"> 
+		 		 and (fileList.showId=2 or fileList.teamId in (select teamId from t_docs_user where id=${userId})) 
+			</if>
+	</select>
+</mapper>

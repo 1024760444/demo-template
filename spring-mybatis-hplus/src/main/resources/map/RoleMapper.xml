@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.apm.echart.dao.client.RoleMapper">
+	<!-- Map结构定义 -->
+	<resultMap id="RoleMap" type="com.apm.echart.dao.model.Role">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="keyword" jdbcType="VARCHAR" property="keyword" />
+		<result column="keyId" jdbcType="INTEGER" property="keyId" />
+		<result column="description" jdbcType="VARCHAR" property="description" />
+	</resultMap>
+	
+	<select id="selectRoleList" resultMap="RoleMap">
+		select id, keyword, keyId, description, creatime from hplus_dictionary order by keyId desc 
+	</select>
+</mapper>

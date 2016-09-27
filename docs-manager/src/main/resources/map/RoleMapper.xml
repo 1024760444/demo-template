@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yhaitao.manager.dao.mapper.RoleMapper">
+	<!-- Map结构定义 -->
+	<resultMap id="RoleMap" type="com.yhaitao.manager.dao.pojo.Role">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="roleName" jdbcType="VARCHAR" property="roleName" />
+		<result column="roleByname" jdbcType="VARCHAR" property="roleByname" />
+		<result column="roleDesc" jdbcType="VARCHAR" property="roleDesc" />
+		<result column="createDate" jdbcType="VARCHAR" property="createDate" />
+	</resultMap>
+	
+	<!-- 角色信息列表 -->
+	<select id="selectAll" resultMap="RoleMap">
+		select id, roleName, roleByname, roleDesc, createDate from t_docs_role order by createDate desc 
+	</select>
+	
+	<!-- 插入一条角色信息 -->
+	<insert id="insert" parameterType="com.yhaitao.manager.dao.pojo.Role">
+		insert into t_docs_role(roleName, roleByname, roleDesc, createDate) values (#{roleName}, #{roleByname},#{roleDesc},#{createDate}) 
+	</insert>
+	
+	<!-- 根据角色标识，删除角色信息 -->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from t_docs_role where id=#{id}
+	</delete>
+</mapper>

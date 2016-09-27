@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.apm.echart.dao.client.UserMapper">
+	<!-- Map结构定义 -->
+	<resultMap id="UserMap" type="com.apm.echart.dao.model.User">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="userName" jdbcType="VARCHAR" property="userName" />
+		<result column="userPasswd" jdbcType="VARCHAR" property="userPasswd" />
+		<result column="roleId" jdbcType="INTEGER" property="roleId" />
+		<result column="userEmail" jdbcType="VARCHAR" property="userEmail" />
+		<result column="userPhone" jdbcType="VARCHAR" property="userPhone" />
+		<result column="creatime" jdbcType="VARCHAR" property="creatime" />
+	</resultMap>
+	
+	<!-- 分页查询 -->
+	<select id="selectPageing" resultMap="UserMap" parameterType="java.util.Map">
+		select id, userName, userPasswd, roleId, userEmail,userPhone, creatime from hplus_user where 1=1 
+		<if  test="userName != null"> 
+		 and userName like '%${userName}%' 
+		</if>
+		<if  test="orderby != null">
+		 order by ${orderby} desc 
+		</if>
+		<if  test="start != null and end != null">
+		 limit ${start}, ${end} 
+		</if>
+	</select>
+	
+	<!-- 插入一个用户信息 -->
+	<insert id="saveOneUser" parameterType="com.apm.echart.dao.model.User">
+		insert into hplus_user (userName, userPasswd, roleId, userEmail, userPhone, creatime) 
+			values (#{userName}, #{userPasswd}, #{roleId}, #{userEmail}, #{userPhone}, #{creatime})
+	</insert>
+	
+	<!-- 更新用户 -->
+	<update id="updateOneUser" parameterType="com.apm.echart.dao.model.User">
+		update hplus_user set userName=#{userName}, userPasswd=#{userPasswd}, roleId=#{roleId}, 
+			userEmail=#{userEmail}, userPhone=#{userPhone}, creatime=#{creatime} where id=#{id}
+	</update>
+	
+	<!-- 删除指定用户 -->
+	<delete id="deleteOneUser" parameterType="com.apm.echart.dao.model.User">
+		delete from hplus_user where id=#{id}
+	</delete>
+	
+	<!-- 分页查询 -->
+	<select id="count" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(*) as count from hplus_user where 1=1 
+		<if  test="userName != null"> 
+		 and userName like '%${userName}%' 
+		</if>
+	</select>
+</mapper>

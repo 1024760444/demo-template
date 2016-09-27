@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yhaitao.manager.dao.mapper.UserMapper">
+	<!-- Map结构定义 -->
+	<resultMap id="UserMap" type="com.yhaitao.manager.dao.pojo.User">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="userName" jdbcType="VARCHAR" property="userName" />
+		<result column="userPasswd" jdbcType="VARCHAR" property="userPasswd" />
+		<result column="roleId" jdbcType="INTEGER" property="roleId" />
+		<result column="roleName" jdbcType="VARCHAR" property="roleName" />
+		<result column="roleByname" jdbcType="VARCHAR" property="roleByname" />
+		<result column="teamId" jdbcType="INTEGER" property="teamId" />
+		<result column="teamName" jdbcType="VARCHAR" property="teamName" />
+		<result column="teamByname" jdbcType="VARCHAR" property="teamByname" />
+		<result column="userEmail" jdbcType="VARCHAR" property="userEmail" />
+		<result column="userPhone" jdbcType="VARCHAR" property="userPhone" />
+		<result column="createDate" jdbcType="VARCHAR" property="createDate" />
+	</resultMap>
+	
+	<!-- 角色信息列表  -->
+	<insert id="insert" parameterType="com.yhaitao.manager.dao.pojo.User" >
+		insert into t_docs_user(userName, userPasswd, roleId, teamId, userEmail, userPhone, createDate) 
+			values (#{userName}, #{userPasswd}, #{roleId}, #{teamId}, #{userEmail},#{userPhone},#{createDate}) 
+	</insert>
+	
+	<!-- 查询用户信息 -->
+	<select id="select" resultMap="UserMap" parameterType="java.util.Map">
+		select user.id, user.userName, user.userPasswd, user.roleId, role.roleName, role.roleByname, 
+			user.userEmail, user.userPhone, user.createDate, user.teamId, team.teamName, team.teamByname 
+			from t_docs_user user, t_docs_role role, t_docs_team team 
+			where user.userName='${userName}' 
+			and user.userPasswd='${userPasswd}' 
+			and user.roleId = role.id 
+			and user.teamId = team.id 
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="selectOnPage" resultMap="UserMap" parameterType="java.util.Map">
+		select user.id, user.userName, user.userPasswd, user.roleId, role.roleName, role.roleByname, 
+			user.userEmail, user.userPhone, user.createDate, user.teamId, team.teamName, team.teamByname 
+			from t_docs_user user, t_docs_role role, t_docs_team team 
+			where 1=1 and user.roleId = role.id and user.teamId = team.id and user.roleId > 1 
+			<if  test="userName != null"> 
+		 		 and user.userName like '%${userName}%' 
+			</if>
+			<if  test="roleId != null"> 
+		 		 and user.roleId='${roleId}' 
+			</if>
+			<if  test="teamId != null"> 
+		 		 and user.teamId='${teamId}' 
+			</if>
+			<if  test="orderby != null">
+		 		 order by ${orderby} desc 
+			</if>
+			<if  test="start != null and perpage != null">
+		 		 limit ${start}, ${perpage} 
+			</if>
+	</select>
+	
+	<!-- 查询总量 -->
+	<select id="count" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(*) as count from t_docs_user user, t_docs_role role, t_docs_team team 
+			where 1=1 and user.roleId = role.id and user.teamId = team.id and user.roleId > 1 
+			<if  test="userName != null"> 
+		 		 and userName like '%${userName}%' 
+			</if>
+			<if  test="roleId != null"> 
+		 		 and user.roleId='${roleId}' 
+			</if>
+			<if  test="teamId != null"> 
+		 		 and user.teamId='${teamId}' 
+			</if>
+	</select>
+	
+	<!-- 删除一个用户 -->
+	<delete id="deleteOneUser" parameterType="java.lang.Integer">
+		delete from t_docs_user where id=#{id}
+	</delete>
+	
+	<!-- 根据用户标识，更新用户信息 -->
+	<update id="updateOneUser" parameterType="com.yhaitao.manager.dao.pojo.User" >
+		update t_docs_user set userName=#{userName}, userPasswd=#{userPasswd}, roleId=#{roleId}, teamId=#{teamId}, 
+			userEmail=#{userEmail}, userPhone=#{userPhone}, createDate=#{createDate} where id=#{id}
+	</update>
+	
+	<select id="selectById" resultMap="UserMap" parameterType="java.lang.Integer">
+		select user.id, user.userName, user.userPasswd, user.roleId, role.roleName, role.roleByname, 
+			user.userEmail, user.userPhone, user.createDate, user.teamId, team.teamName, team.teamByname 
+			from t_docs_user user, t_docs_role role, t_docs_team team 
+			where user.roleId = role.id and user.teamId = team.id and user.id=#{id} 
+	</select>
+</mapper>

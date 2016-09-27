@@ -75,5 +75,61 @@
 			<if  test="userId != null"> 
 		 		 and (fileList.showId=2 or fileList.teamId in (select teamId from t_docs_user where id=${userId})) 
 			</if>
+			<if  test="showId != null">
+		 		 and filelist.showId='${showId}' 
+			</if>
+			<if  test="id != null">
+		 		 and filelist.id='${id}' 
+			</if>
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="selectOnUser" resultMap="FileMap" parameterType="java.util.Map">
+		select filelist.id, filelist.fileName, filelist.fileDesc, filelist.teamId, team.teamByname, 
+		filelist.userId, user.userName, filelist.showId, filelist.downId, filelist.downCode, filelist.createDate 
+		from t_docs_filelist filelist, t_docs_user user, t_docs_team team 
+			where 1=1 and filelist.teamId=team.id and filelist.userId=user.id 
+			<if  test="fileName != null"> 
+		 		 and filelist.fileName like '%${fileName}%' 
+			</if>
+			<if  test="teamId != null"> 
+		 		 and filelist.teamId='${teamId}' 
+			</if>
+			<if  test="userId != null"> 
+		 		 and filelist.userId='${userId}' 
+			</if>
+			<if  test="showId != null">
+		 		 and filelist.showId='${showId}' 
+			</if>
+			<if  test="id != null">
+		 		 and filelist.id='${id}' 
+			</if>
+			<if  test="orderby != null">
+		 		 order by ${orderby} desc 
+			</if>
+			<if  test="start != null and perpage != null">
+		 		 limit ${start}, ${perpage} 
+			</if>
+	</select>
+	
+	<!-- 查询总量 -->
+	<select id="countOnUser" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(*) as count from t_docs_filelist filelist, t_docs_user user, t_docs_team team 
+			where 1=1 and filelist.teamId=team.id and filelist.userId=user.id 
+			<if  test="fileName != null"> 
+		 		 and filelist.fileName like '%${fileName}%' 
+			</if>
+			<if  test="teamId != null"> 
+		 		 and filelist.teamId='${teamId}' 
+			</if>
+			<if  test="userId != null"> 
+		 		 and filelist.userId='${userId}' 
+			</if>
+			<if  test="showId != null">
+		 		 and filelist.showId='${showId}' 
+			</if>
+			<if  test="id != null">
+		 		 and filelist.id='${id}' 
+			</if>
 	</select>
 </mapper>

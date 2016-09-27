@@ -173,7 +173,7 @@
     	// 1 文件加载展示数据
 		$.ajax({
 			type : "GET",
-			url : "/docs-manager/file/scan",
+			url : "/docs-manager/file/scanMyFiles",
 			data : {
 				'search_userId' : $("#uid").val(),
 			},
@@ -220,7 +220,7 @@
 		$(".input-group-btn").click(function() {
 			$.ajax({
 				type : "GET",
-				url : "/docs-manager/file/scan",
+				url : "/docs-manager/file/scanMyFiles",
 				data : {
 					'currpage' : 1,
 					'perpage' : 10,
@@ -307,7 +307,7 @@
 		    	var currpage = $(this).text();
 		    	$.ajax({
 					type : "GET",
-					url : "/docs-manager/file/scan",
+					url : "/docs-manager/file/scanMyFiles",
 					data : {
 						'currpage' : currpage,
 						'perpage' : 10,

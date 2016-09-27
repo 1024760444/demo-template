@@ -91,6 +91,75 @@ public class FileController {
 	}
 	
 	/**
+	 * 查询我上次的文件列表。
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/scanMyFiles", method = RequestMethod.GET)
+	public Map<String, String> scanMyFiles(HttpServletRequest request, Model model) {
+		/** 分页：当前页，每页记录数 **/
+		String currPageString = request.getParameter("currpage");
+		String perpageString = request.getParameter("perpage");
+		String search_fileName = request.getParameter("search_fileName");
+		if(search_fileName != null) {
+			try {
+				search_fileName = new String(search_fileName.getBytes("iso-8859-1"), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				search_fileName = null;
+			}
+		}
+		String search_teamId = request.getParameter("search_teamId");
+		int currpage = Cons.strToInt(currPageString, 1);
+		int perpage = Cons.strToInt(perpageString, 10);
+		
+		HttpSession session = request.getSession();
+		int userId = -1;
+		try {
+			userId = (Integer) session.getAttribute("userId");
+		} catch (Exception e) {
+			userId = -1;
+		}
+		int teamId = Cons.strToInt(search_teamId, -1);
+		
+		/** 根据分页查询信息  **/
+		Map<String, String> input = new HashMap<String, String>();
+		if(search_fileName != null && !"".equals(search_fileName)) {
+			input.put("fileName", search_fileName.trim());
+		}
+		if(userId != -1) {
+			input.put("userId", String.valueOf(userId));
+		} else {
+			input.put("showId", String.valueOf(2));
+		}
+		if(teamId != -1) {
+			input.put("teamId", String.valueOf(teamId));
+		}
+		input.put("orderby", "createDate");
+		input.put("start", String.valueOf((currpage - 1) * perpage));
+		input.put("perpage", String.valueOf(perpage));
+		List<FilePojo> filePojoList = fileMapper.selectOnUser(input);
+		
+		/** 获取当前用户总量 **/
+		int count = fileMapper.countOnUser(input);
+		int totalpage = (int)Math.ceil((double)count/perpage);
+		
+		// 所有分组列表
+		List<Team> teamList = teamMapper.selectOnPage(new HashMap<String, String>());
+		
+		/** 查询到的数据和其他相关数据返回到页面 **/
+		Map<String, String> roleTemplate = new HashMap<String, String>();
+		roleTemplate.put("datas", Cons.gson.toJson(filePojoList));
+		roleTemplate.put("count", String.valueOf(count));
+		roleTemplate.put("currpage", String.valueOf(currpage));
+		roleTemplate.put("totalpage", String.valueOf(totalpage));
+		roleTemplate.put("teamIdList", Cons.gson.toJson(teamList));
+		roleTemplate.put("search_fileName", search_fileName);
+		return roleTemplate;
+	}
+	
+	/**
 	 * 浏览当前文件列表。
 	 */
 	@ResponseBody
@@ -164,30 +233,35 @@ public class FileController {
 		/** 获取需要下载的文件编号与下载码 **/
 		String idStr = request.getParameter("id");
 		String codeStr = request.getParameter("code");
-		int id = Cons.strToInt(idStr, -1);
-		if(id == -1) {
-			return ;
-		}
-		
-		/** 查询文件信息 **/
-		Map<String, String> input = new HashMap<String, String>();
-		input.put("id", idStr);
-		List<FilePojo> selectOnPage = fileMapper.selectOnPage(input);
-		if(selectOnPage == null || selectOnPage.isEmpty()) {
-			return ;
+		HttpSession session = request.getSession();
+		int userId = -1;
+		try {
+			userId = (Integer) session.getAttribute("userId");
+		} catch (Exception e) {
+			userId = -1;
 		}
 		
 		/** 寻找文件，查看文件是否存在 **/
-		FilePojo filePojo = selectOnPage.get(0);
+		FilePojo filePojo = hasFile(idStr);
 		if(filePojo == null) {
 			return ;
 		}
+		
 		/** 验证下载码 **/
-		String fileName = filePojo.getFileName();
 		String downCode = filePojo.getDownCode();
-		if(downCode != null && !"".equals(downCode) && !codeStr.equals(downCode)) {
-			return ;
+		String fileName = filePojo.getFileName();
+		if(downCode != null && !"".equals(downCode)) {
+			// 如果下载码存在，匹配不正确，则无法下载。
+			if(!codeStr.equals(downCode)) {
+				return ;
+			}
+		} else {
+			if(!canDownLoad(userId, filePojo)) {
+				return ;
+			}
 		}
+		
+		/** 寻找文件，查看根据数据库的文件信息，真实文件是否存在 **/
 		String timerPath = "20190921";
 		try {
 			timerPath = TimerUtil.getDateFormat(filePojo.getCreateDate());
@@ -206,7 +280,7 @@ public class FileController {
 		try {
 			response.setContentType("application/octet-stream; charset=utf-8");
 			// response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + new String(fileName.getBytes("UTF-8"),"iso-8859-1") + "\"");
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + new String(file.getName().getBytes("UTF-8"),"iso-8859-1") + "\"");
 			inputStream = new FileInputStream(file);
 			outputStream = response.getOutputStream();
 			IOUtils.copy(inputStream, outputStream);
@@ -229,6 +303,61 @@ public class FileController {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}
+		}
+	}
+	
+	/**
+	 * 文件存在。
+	 * @param idStr 文件标识
+	 * @return 文件的信息
+	 */
+	private FilePojo hasFile(String idStr) {
+		int id = Cons.strToInt(idStr, -1);
+		if(id == -1) {
+			return null;
+		}
+		Map<String, String> input = new HashMap<String, String>();
+		input.put("id", String.valueOf(idStr));
+		List<FilePojo> selectOnPage = fileMapper.selectOnPage(input);
+		if(selectOnPage == null || selectOnPage.isEmpty()) {
+			return null;
+		}
+		return selectOnPage.get(0);
+	}
+	
+	/**
+	 * 当前用户是否有权限下载
+	 * @param userId 用户唯一标识
+	 * @param file 文件信息
+	 * @return
+	 */
+	private boolean canDownLoad(int userId, FilePojo file) {
+		/** 该文件为所有用户可下载状态 **/
+		if(file.getDownId() == 2) {
+			return true;
+		} 
+		/** 仅本组用户可下载 **/
+		else if(file.getDownId() == 1) {
+			/** 用户不存在，不可下载 **/
+			List<User> selectById = userMapper.selectById(userId);
+			if(selectById == null || selectById.isEmpty()) {
+				return false;
+			} else {
+				User user = selectById.get(0);
+				if(user.getTeamId() == file.getTeamId()) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		} 
+		/** 仅仅自己可下载 **/
+		else {
+			if(userId == file.getUserId()) {
+				return true;
+			} else {
+				return false;
 			}
 		}
 	}
@@ -298,6 +427,6 @@ public class FileController {
 				}
 			}
 		}
-		return scan(request, model);
+		return scanMyFiles(request, model);
 	}
 }

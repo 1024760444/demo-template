@@ -39,4 +39,18 @@ public interface FileMapper {
 	 * 根据文件ID删除文件。
 	 */
 	public void delete(int id);
+	
+	/**
+	 * 分页查询。
+	 * @param input 查询条件
+	 * @return 满足条件的文件信息
+	 */
+	public List<FilePojo> selectOnUser(Map<String, String> input);
+	
+	/**
+	 * 统计文件信息数量
+	 * @param input 查询条件
+	 * @return 文件数量
+	 */
+	public int countOnUser(Map<String, String> input);
 }

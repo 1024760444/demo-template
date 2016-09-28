@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!--  -->
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${user.dir}/logs/hadoop-ecosystem.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${user.dir}/logs/hadoop-ecosystem.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+			<TimeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<MaxFileSize>1024MB</MaxFileSize>
+			</TimeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d [%thread] %-5level %logger{35} - %msg%n
+			</pattern>
+<!-- 			<pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n -->
+<!-- 			</pattern> -->
+		</encoder>
+	</appender>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d [%thread] %-5level %logger{35} - %msg %n
+			</pattern>
+<!-- 			<pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg %n -->
+<!-- 			</pattern> -->
+		</encoder>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="FILE" />
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>

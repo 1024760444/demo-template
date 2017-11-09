@@ -1,12 +1,22 @@
 package com.yhaitao.rest;
 
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +48,24 @@ public class ReportBoot {
 	 * @return
 	 * @throws JSONException 
 	 */
-	@Path("/reportBootInitiation")
 	@POST
+	@Path("/reportBootInitiation")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public String initiation(String json) {
+	public Response initiation(@Context HttpHeaders headers, @QueryParam("token") String token, String json) {
 		LOGGER.info("start invoke initiation");
 		// 响应结果 : resultMap一级，resultData二级
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String, Object> resultData = new HashMap<String, Object>();
+		
+		System.err.println("token : " + token);
+		
+		MultivaluedMap<String, String> requestHeaders = headers.getRequestHeaders();
+		Iterator<Entry<String, List<String>>> iterator = requestHeaders.entrySet().iterator();
+		while(iterator.hasNext()) {
+			Entry<String, List<String>> next = iterator.next();
+			System.err.println(next.getKey() + " : " + next.getValue());
+		}
 		
 		// 解析数据
 		@SuppressWarnings("unchecked")
@@ -105,6 +124,12 @@ public class ReportBoot {
 		
 		// 响应设置
 		resultMap.put("ResultData", resultData);
-		return GSON.toJson(resultMap);
+		Response response = Response.ok().entity(GSON.toJson(resultMap))
+				.cookie(NewCookie.valueOf("id=" + "1234"))
+				.cookie(NewCookie.valueOf("domain="+ "www.yhaitao.net"))
+				.cookie(NewCookie.valueOf("path=/"))
+				.expires(Calendar.getInstance().getTime())
+				.build();
+		return response;
 	}
 }
